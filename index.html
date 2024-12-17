@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Juros Compostos</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f9fafc;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background: #ffffff;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            padding: 30px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        h1 {
+            font-size: 24px;
+            text-align: center;
+            color: #4CAF50;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        input:focus {
+            border-color: #4CAF50;
+            outline: none;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .result {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 18px;
+            color: #333;
+            font-weight: 600;
+            padding: 10px;
+            background-color: #f0fdf4;
+            border: 1px solid #d1fad5;
+            border-radius: 5px;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 20px;
+            }
+
+            button {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>Calculadora de Juros Compostos</h1>
+
+        <div class="form-group">
+            <label for="valor-inicial">Valor Inicial</label>
+            <input type="number" id="valor-inicial" placeholder="Digite o valor inicial" required>
+        </div>
+
+        <div class="form-group">
+            <label for="taxa-juros">Taxa de Juros (em %)</label>
+            <input type="number" id="taxa-juros" placeholder="Digite a taxa de juros" step="0.01" required>
+        </div>
+
+        <div class="form-group">
+            <label for="periodo">Período (em anos)</label>
+            <input type="number" id="periodo" placeholder="Digite o período em anos" required>
+        </div>
+
+        <button onclick="calcularJuros()">Calcular</button>
+
+        <div class="result" id="result">
+            <!-- O resultado será exibido aqui -->
+        </div>
+    </div>
+
+    <script>
+        function calcularJuros() {
+            const valorInicial = parseFloat(document.getElementById("valor-inicial").value);
+            const taxaJuros = parseFloat(document.getElementById("taxa-juros").value) / 100;  // Converte a taxa de % para decimal
+            const periodo = parseInt(document.getElementById("periodo").value);
+
+            if (isNaN(valorInicial) || isNaN(taxaJuros) || isNaN(periodo)) {
+                alert("Por favor, preencha todos os campos corretamente.");
+                return;
+            }
+
+            // Enviar os dados para a API
+            fetch("http://localhost:8080/calculate", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    valor_inicial: valorInicial,
+                    taxa_juros: taxaJuros,
+                    periodo: periodo,
+                }),
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Erro ao responder da API');
+                    }
+                    return response.json();  // Convertendo a resposta para JSON
+                })
+                .then(data => {
+                    const formattedValue = data.valor_final
+                        .toFixed(2)
+                        .replace(".", ",");
+                    document.getElementById("result").innerHTML = `Valor Final: R$ ${formattedValue}`;
+                })
+
+                .catch(error => {
+                    console.error("Erro ao calcular:", error);
+                    alert("Ocorreu um erro. Tente novamente.");
+                });
+        }
+    </script>
+
+</body>
+
+</html>
